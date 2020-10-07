@@ -36,7 +36,6 @@
  * @property {string} caption — image caption
  * @property {boolean} withBorder - should image be rendered with border
  * @property {boolean} withBackground - should image be rendered with background
- * @property {boolean} stretched - should image be stretched to full width of container
  * @property {object} file — Image file data returned from backend
  * @property {string} file.url — image URL
  */
@@ -390,20 +389,6 @@ export default class ImageTool {
     this._data[tuneName] = value;
 
     this.ui.applyTune(tuneName, value);
-
-    if (tuneName === 'stretched') {
-      /**
-       * Wait until the API is ready
-       */
-      Promise.resolve().then(() => {
-        const blockId = this.api.blocks.getCurrentBlockIndex();
-
-        this.api.blocks.stretchBlock(blockId, value);
-      })
-        .catch(err => {
-          console.error(err);
-        });
-    }
   }
 
   /**
