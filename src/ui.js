@@ -13,8 +13,10 @@ export default class Ui {
    * @param {ImageConfig} ui.config - user config
    * @param {Function} ui.onSelectFile - callback for clicks on Select file button
    * @param {boolean} ui.readOnly - read-only mode flag
+   * @param {string} ui.loadedLink
+   * @param {Function} ui.getOutOfLink
    */
-  constructor({ api, config, onSelectFile, readOnly }) {
+  constructor({ api, config, onSelectFile, readOnly, loadedLink, getOutOfLink }) {
     this.api = api;
     this.config = config;
     this.onSelectFile = onSelectFile;
@@ -28,7 +30,19 @@ export default class Ui {
       caption: make('div', [this.CSS.input, this.CSS.caption], {
         contentEditable: !this.readOnly,
       }),
+      addLinkArea: undefined,
     };
+
+    this.getOutofLink = getOutOfLink;
+
+    this.linkState = {
+      open: false,
+      focused: false,
+      data: loadedLink || '',
+      stored: loadedLink || '',
+    };
+
+    this.toggleAddLink = this.toggleAddLink.bind(this);
 
     /**
      * Create base structure
@@ -45,6 +59,20 @@ export default class Ui {
     this.nodes.wrapper.appendChild(this.nodes.imageContainer);
     this.nodes.wrapper.appendChild(this.nodes.caption);
     this.nodes.wrapper.appendChild(this.nodes.fileButton);
+
+    if (loadedLink !== '' && loadedLink !== undefined) {
+      this.toggleAddLink();
+    }
+  }
+
+  /**
+   * Link state
+   *
+   * @returns {{data: string, focused: boolean, open: boolean}}
+   * @class
+   */
+  get LinkState() {
+    return this.linkState;
   }
 
   /**
@@ -67,6 +95,7 @@ export default class Ui {
       imagePreloader: 'image-tool__image-preloader',
       imageEl: 'image-tool__image-picture',
       caption: 'image-tool__caption',
+      addLinkArea: 'image-tool__link-area',
     };
   };
 
@@ -93,6 +122,7 @@ export default class Ui {
    * @returns {Element}
    */
   render(toolData) {
+
     if (!toolData.file || Object.keys(toolData.file).length === 0) {
       this.toggleStatus(Ui.status.EMPTY);
     } else {
@@ -239,14 +269,105 @@ export default class Ui {
   }
 
   /**
+   * changes display link input status
+   */
+  toggleAddLink() {
+    this.linkState.open = !this.linkState.open;
+    const unloadLinkUI = () => {
+      const children = this.nodes.wrapper.childNodes;
+
+      for (let cnt = 0; cnt < children.length; cnt++) {
+        if (children[cnt].classList.contains(this.CSS.addLinkArea)) {
+          //  clear input, remove child
+          children[cnt].value = '';
+          this.nodes.wrapper.removeChild(children[cnt]);
+        }
+      }
+    };
+    const enterFunc = e => {
+      const key = e.keyCode || e.which;
+
+      if (key === 13) {
+        this.linkState.open = false;
+        this.linkState.stored = this.linkState.data;
+        this.getOutofLink(e);
+      }
+    };
+
+    if (this.linkState.open) {
+      if (this.nodes.addLinkArea === undefined) {
+        const inputArea = make('input', this.CSS.addLinkArea, {
+          placeholder: '링크를 입력하세요',
+          defaultValue: this.linkState.data,
+        });
+
+        inputArea.addEventListener('focus', () => {
+          this.linkState.focused = true;
+        });
+        inputArea.addEventListener('blur', () => {
+          this.linkState.focused = false;
+          this.linkState.stored = this.linkState.data;
+        });
+        inputArea.addEventListener('input', e => {
+          this.linkState.data = e.target.value;
+          if (e.target.value === '') {
+            this.linkState.stored = '';
+          }
+        });
+        inputArea.addEventListener('keydown', enterFunc);
+        this.nodes.addLinkArea = inputArea;
+      }
+      this.nodes.wrapper.prepend(this.nodes.addLinkArea);
+    } else {
+      unloadLinkUI();
+    }
+  }
+
+  // /**
+  //  * applies link to node
+  //  *
+  //  * @param {string} link - link to apply
+  //  * @returns {void}
+  //  */
+  // applyLink(link) {
+  //   const aTag = document.createElement('a');
+  //
+  //   aTag.href = link;
+  //   aTag.innerHTML = this.nodes.wrapper.innerHTML;
+  //   this.nodes.wrapper.parentNode.replaceChild(this.nodes.wrapper, aTag);
+  // }
+
+  // /**
+  //  * a tag to div
+  //  *
+  //  * @returns {void}
+  //  */
+  // removeLink() {
+  //   const divTag = document.createElement('div');
+  //
+  //   divTag.innerHTML = this.nodes.wrapper.innerHTML;
+  //   this.nodes.wrapper.parentNode.replaceChild(this.nodes.wrapper, divTag);
+  // }
+
+  /**
    * Apply visual representation of activated tune
    *
    * @param {string} tuneName - one of available tunes {@link Tunes.tunes}
-   * @param {boolean} status - true for enable, false for disable
+   * @param {any} status - true for enable, false for disable
    * @returns {void}
    */
   applyTune(tuneName, status) {
+    // if (status === true || status === false)
     this.nodes.wrapper.classList.toggle(`${this.CSS.wrapper}--${tuneName}`, status);
+    // else {
+    //   //  for links
+    //   if (tuneName === 'withLink') {
+    //     const aTag = document.createElement('a');
+    //
+    //     aTag.innerHTML = this.nodes.wrapper.innerHTML;
+    //     this.nodes.wrapper.parentNode.replaceChild(this.nodes.wrapper, aTag);
+    //   }
+    // }
   }
 }
 
