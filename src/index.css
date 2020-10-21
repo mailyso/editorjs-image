@@ -141,7 +141,7 @@
 	}
 	&__link-area {
 		position: absolute;
-		top: 50px;
+		top: -40px;
 		right: 0;
 
 		outline: none;
@@ -149,11 +149,15 @@
 		border-radius: 0 0 4px 4px;
 		margin: 0;
 		font-size: 13px;
-		padding: 10px;
+		padding: 10px 10px 5px 10px;
 		min-width: 300px;
 		font-weight: 500;
-		border-top: 1px solid rgba(201,201,204,.48);
-		min-height: 50px;
+		border-top: 1px solid rgba(180,180,180,.48);
+		min-height: 30px;
+	}
+	&__link-error {
+		text-decoration: dotted red;
+		text-decoration-line: underline;
 	}
 }
 

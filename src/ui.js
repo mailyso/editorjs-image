@@ -40,6 +40,7 @@ export default class Ui {
       focused: false,
       data: loadedLink || '',
       stored: loadedLink || '',
+      linkError: false,
     };
 
     this.toggleAddLink = this.toggleAddLink.bind(this);
@@ -76,6 +77,23 @@ export default class Ui {
   }
 
   /**
+   * set link validity
+   * @param bool {boolean}
+   * @constructor
+   */
+  set LinkError(bool) {
+    this.linkState.linkError = bool;
+    console.log("linkError check", bool);
+    if (this.nodes.addLinkArea !== undefined) {
+      if (bool) {
+        this.nodes.addLinkArea.classList.add(this.CSS.linkError);
+      } else {
+        this.nodes.addLinkArea.classList.remove(this.CSS.linkError);
+      }
+    }
+  }
+
+  /**
    * CSS classes
    *
    * @returns {object}
@@ -96,6 +114,7 @@ export default class Ui {
       imageEl: 'image-tool__image-picture',
       caption: 'image-tool__caption',
       addLinkArea: 'image-tool__link-area',
+      linkError: 'image-tool__link-error',
     };
   };
 
@@ -290,6 +309,7 @@ export default class Ui {
       if (key === 13) {
         this.linkState.open = false;
         this.linkState.stored = this.linkState.data;
+        this.LinkError = !linkCheck(this.linkState.stored);
         this.getOutofLink(e);
       }
     };
@@ -303,25 +323,33 @@ export default class Ui {
 
         inputArea.addEventListener('focus', () => {
           this.linkState.focused = true;
+          this.LinkError = false;
         });
         inputArea.addEventListener('blur', () => {
           this.linkState.focused = false;
           this.linkState.stored = this.linkState.data;
+          if (this.linkState.stored !== '') {
+            this.LinkError = !linkCheck(this.linkState.stored);
+          }
         });
         inputArea.addEventListener('input', e => {
           this.linkState.data = e.target.value;
           if (e.target.value === '') {
             this.linkState.stored = '';
+            this.LinkError = false;
           }
         });
         inputArea.addEventListener('keydown', enterFunc);
         this.nodes.addLinkArea = inputArea;
+        if (this.linkState.stored !== '') {
+          this.LinkError = !linkCheck(this.linkState.stored);
+        }
       }
       this.nodes.wrapper.prepend(this.nodes.addLinkArea);
-      this.nodes.addLinkArea.focus();
     } else {
       unloadLinkUI();
       this.linkState.stored = '';
+      this.LinkError = false;
     }
   }
 
@@ -396,3 +424,6 @@ export const make = function make(tagName, classNames = null, attributes = {}) {
 
   return el;
 };
+
+// eslint-disable-next-line
+const linkCheck = str => /\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/.test(str);
