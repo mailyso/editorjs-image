@@ -318,8 +318,10 @@ export default class Ui {
         this.nodes.addLinkArea = inputArea;
       }
       this.nodes.wrapper.prepend(this.nodes.addLinkArea);
+      this.nodes.addLinkArea.focus();
     } else {
       unloadLinkUI();
+      this.linkState.stored = '';
     }
   }
 

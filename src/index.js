@@ -163,9 +163,9 @@ export default class ImageTool {
         withLink: this.ui.toggleAddLink,
       },
     });
-    if (data.link !== '') {
-      this.tunes.normalTuneClicked('withLink');
-    }
+    // if (data.link !== '' && data.link !== undefined) {
+    //   this.tunes.normalTuneClicked('withLink');
+    // }
 
 
     /**
@@ -439,9 +439,15 @@ export default class ImageTool {
    * @returns {void}
    */
   setTune(tuneName, value) {
-    this._data[tuneName] = value;
+    if (tuneName === "withLink") {
+      const withLinkState = this.ui.linkState.open === true;
 
-    this.ui.applyTune(tuneName, value);
+      this._data[tuneName] = withLinkState;
+      this.ui.applyTune(tuneName, withLinkState);
+    } else {
+      this._data[tuneName] = value;
+      this.ui.applyTune(tuneName, value);
+    }
   }
 
   /**
