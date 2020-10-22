@@ -374,7 +374,6 @@ export default class ImageTool {
   onUpload(response) {
     if (response.success && response.file) {
       this.image = response.file;
-      this.ui.hidePreloader();
     } else {
       this.uploadingFailed('incorrect response: ' + JSON.stringify(response));
     }
