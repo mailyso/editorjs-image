@@ -83,7 +83,7 @@ export default class Ui {
    */
   set LinkError(bool) {
     this.linkState.linkError = bool;
-    console.log("linkError check", bool);
+    
     if (this.nodes.addLinkArea !== undefined) {
       if (bool) {
         this.nodes.addLinkArea.classList.add(this.CSS.linkError);
