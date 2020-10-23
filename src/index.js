@@ -132,6 +132,8 @@ export default class ImageTool {
       onError: (error) => this.uploadingFailed(error),
     });
 
+    this.getOutOfLink = this.getOutOfLink.bind(this);
+
     /**
      * Module for working with UI
      */
@@ -146,6 +148,8 @@ export default class ImageTool {
         });
       },
       readOnly,
+      loadedLink: data.link || '',
+      getOutOfLink: this.getOutOfLink,
     });
 
     /**
@@ -155,7 +159,14 @@ export default class ImageTool {
       api,
       actions: this.config.actions,
       onChange: (tuneName) => this.tuneToggled(tuneName),
+      customEffect: {
+        withLink: this.ui.toggleAddLink,
+      },
     });
+    // if (data.link !== '' && data.link !== undefined) {
+    //   this.tunes.normalTuneClicked('withLink');
+    // }
+
 
     /**
      * Set saved state
@@ -163,6 +174,24 @@ export default class ImageTool {
     this._data = {};
     this.data = data;
   }
+
+  // /**
+  //  * link custom logic
+  //  *
+  //  * @public
+  //  *
+  //  * @returns {void}
+  //  */
+  // linkCustomEffect() {
+  //   this.ui.toggleAddLink();
+  //   // if (this._data.withLink === false) {
+  //   //   this._data.withLink = 'www.youtube.com';
+  //   //   this.ui.applyLink('www.youtube.com');
+  //   // } else {
+  //   //   this._data.withLink = false;
+  //   //   this.ui.removeLink();
+  //   // }
+  // }
 
   /**
    * Renders Block content
@@ -186,6 +215,7 @@ export default class ImageTool {
     const caption = this.ui.nodes.caption;
 
     this._data.caption = caption.innerHTML;
+    this._data.link = this.ui.linkState.stored;
 
     return this.data;
   }
@@ -297,10 +327,11 @@ export default class ImageTool {
     this.image = data.file;
 
     this._data.caption = data.caption || '';
+    this._data.link = this.ui.linkState.stored;
     this.ui.fillCaption(this._data.caption);
 
     Tunes.tunes.forEach(({ name: tune }) => {
-      const value = typeof data[tune] !== 'undefined' ? data[tune] === true || data[tune] === 'true' : false;
+      const value = typeof data[tune] !== 'undefined' ? data[tune] : false;
 
       this.setTune(tune, value);
     });
@@ -379,16 +410,43 @@ export default class ImageTool {
   }
 
   /**
+   * Generate new block and escape
+   * @param event
+   */
+  getOutOfLink(event) {
+    const blockCnt = this.api.blocks.getBlocksCount();
+    const curBlockIndex = this.api.blocks.getCurrentBlockIndex();
+
+    if (blockCnt === curBlockIndex + 1) {
+      //  case this block is final block
+      this.api.blocks.insert(undefined, undefined, undefined, undefined, true);
+      this.api.caret.setToLastBlock("start", 0);
+    } else {
+      this.api.caret.setToNextBlock("start", 0);
+    }
+    //  this screws up captions for some reason
+    // setCaretPosition(this.ui.nodes.caption, 0);
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /**
    * Set one tune
    *
    * @param {string} tuneName - {@link Tunes.tunes}
-   * @param {boolean} value - tune state
+   * @param {boolean} any - tune state
    * @returns {void}
    */
   setTune(tuneName, value) {
-    this._data[tuneName] = value;
+    if (tuneName === "withLink") {
+      const withLinkState = this.ui.linkState.open === true;
 
-    this.ui.applyTune(tuneName, value);
+      this._data[tuneName] = withLinkState;
+      this.ui.applyTune(tuneName, withLinkState);
+    } else {
+      this._data[tuneName] = value;
+      this.ui.applyTune(tuneName, value);
+    }
   }
 
   /**
@@ -416,3 +474,25 @@ export default class ImageTool {
     this.uploader.uploadByUrl(url);
   }
 }
+
+
+//  got from here
+//  https://stackoverflow.com/questions/512528/set-keyboard-caret-position-in-html-textbox
+// function setCaretPosition(elem, caretPos) {
+//   if (elem) {
+//     if (elem.createTextRange) {
+//       const range = elem.createTextRange();
+//       range.move('character', caretPos);
+//       range.select();
+//     }
+//     else {
+//       if (elem.selectionStart) {
+//         elem.focus();
+//         elem.setSelectionRange(caretPos, caretPos);
+//       }
+//       else {
+//         elem.focus();
+//       }
+//     }
+//   }
+// }
