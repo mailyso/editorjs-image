@@ -317,7 +317,8 @@ export default class Ui {
         }
       }
       this.nodes.wrapper.prepend(this.nodes.addLinkArea);
-      this.nodes.addLinkArea.focus();
+      // f u focus
+      // this.nodes.addLinkArea.focus();
     } else {
       unloadLinkUI();
       this.linkState.stored = '';
