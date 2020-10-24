@@ -17,21 +17,12 @@ export default class Ui {
    * @param {Function} ui.getOutOfLink
    */
   constructor({ api, config, onSelectFile, readOnly, loadedLink, getOutOfLink }) {
+    this.createInputArea = this.createInputArea.bind(this);
+
     this.api = api;
     this.config = config;
     this.onSelectFile = onSelectFile;
     this.readOnly = readOnly;
-    this.nodes = {
-      wrapper: make('div', [this.CSS.baseClass, this.CSS.wrapper]),
-      imageContainer: make('div', [ this.CSS.imageContainer ]),
-      fileButton: this.createFileButton(),
-      imageEl: undefined,
-      imagePreloader: make('div', this.CSS.imagePreloader),
-      caption: make('div', [this.CSS.input, this.CSS.caption], {
-        contentEditable: !this.readOnly,
-      }),
-      addLinkArea: undefined,
-    };
 
     this.getOutofLink = getOutOfLink;
 
@@ -44,6 +35,21 @@ export default class Ui {
     };
 
     this.toggleAddLink = this.toggleAddLink.bind(this);
+
+
+    this.nodes = {
+      wrapper: make('div', [this.CSS.baseClass, this.CSS.wrapper]),
+      imageContainer: make('div', [ this.CSS.imageContainer ]),
+      fileButton: this.createFileButton(),
+      imageEl: undefined,
+      imagePreloader: make('div', this.CSS.imagePreloader),
+      caption: make('div', [this.CSS.input, this.CSS.caption], {
+        contentEditable: !this.readOnly,
+      }),
+      addLinkArea: this.createInputArea(),
+    };
+
+
 
     /**
      * Create base structure
@@ -83,7 +89,7 @@ export default class Ui {
    */
   set LinkError(bool) {
     this.linkState.linkError = bool;
-    
+
     if (this.nodes.addLinkArea !== undefined) {
       if (bool) {
         this.nodes.addLinkArea.classList.add(this.CSS.linkError);
@@ -303,6 +309,27 @@ export default class Ui {
         }
       }
     };
+
+    if (this.linkState.open) {
+      if (this.nodes.addLinkArea === undefined) {
+        if (this.linkState.stored !== '') {
+          this.LinkError = !linkCheck(this.linkState.stored);
+        }
+      }
+      this.nodes.wrapper.prepend(this.nodes.addLinkArea);
+      this.nodes.addLinkArea.focus();
+    } else {
+      unloadLinkUI();
+      this.linkState.stored = '';
+      this.LinkError = false;
+    }
+  }
+
+  /**
+   * creates inputArea
+   * @returns {Element}
+   */
+  createInputArea() {
     const enterFunc = e => {
       const key = e.keyCode || e.which;
 
@@ -313,44 +340,32 @@ export default class Ui {
         this.getOutofLink(e);
       }
     };
+    const inputArea = make('input', [this.CSS.addLinkArea, this.CSS.input], {
+      placeholder: '링크를 입력하세요',
+      defaultValue: this.linkState.data,
+    });
 
-    if (this.linkState.open) {
-      if (this.nodes.addLinkArea === undefined) {
-        const inputArea = make('input', this.CSS.addLinkArea, {
-          placeholder: '링크를 입력하세요',
-          defaultValue: this.linkState.data,
-        });
-
-        inputArea.addEventListener('focus', () => {
-          this.linkState.focused = true;
-          this.LinkError = false;
-        });
-        inputArea.addEventListener('blur', () => {
-          this.linkState.focused = false;
-          this.linkState.stored = this.linkState.data;
-          if (this.linkState.stored !== '') {
-            this.LinkError = !linkCheck(this.linkState.stored);
-          }
-        });
-        inputArea.addEventListener('input', e => {
-          this.linkState.data = e.target.value;
-          if (e.target.value === '') {
-            this.linkState.stored = '';
-            this.LinkError = false;
-          }
-        });
-        inputArea.addEventListener('keydown', enterFunc);
-        this.nodes.addLinkArea = inputArea;
-        if (this.linkState.stored !== '') {
-          this.LinkError = !linkCheck(this.linkState.stored);
-        }
-      }
-      this.nodes.wrapper.prepend(this.nodes.addLinkArea);
-    } else {
-      unloadLinkUI();
-      this.linkState.stored = '';
+    inputArea.addEventListener('focus', () => {
+      this.linkState.focused = true;
       this.LinkError = false;
-    }
+    });
+    inputArea.addEventListener('blur', () => {
+      this.linkState.focused = false;
+      this.linkState.stored = this.linkState.data;
+      if (this.linkState.stored !== '') {
+        this.LinkError = !linkCheck(this.linkState.stored);
+      }
+    });
+    inputArea.addEventListener('input', e => {
+      this.linkState.data = e.target.value;
+      if (e.target.value === '') {
+        this.linkState.stored = '';
+        this.LinkError = false;
+      }
+    });
+    inputArea.addEventListener('keydown', enterFunc);
+
+    return inputArea;
   }
 
   // /**
