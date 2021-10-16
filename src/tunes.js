@@ -1,6 +1,7 @@
 import { make } from './ui';
 import bgIcon from './svg/background.svg';
 import borderIcon from './svg/border.svg';
+import linkIcon from './svg/link.svg';
 
 /**
  * Working with Block Tunes
@@ -11,12 +12,16 @@ export default class Tunes {
    * @param {object} tune.api - Editor API
    * @param {object} tune.actions - list of user defined tunes
    * @param {Function} tune.onChange - tune toggling callback
+   * @param {object} tune.customEffect - object with custom effects
    */
-  constructor({ api, actions, onChange }) {
+  constructor({ api, actions, onChange, customEffect }) {
     this.api = api;
     this.actions = actions;
     this.onChange = onChange;
+    this.customEffect = customEffect;
     this.buttons = [];
+
+    this.normalTuneClicked = this.normalTuneClicked.bind(this);
   }
 
   /**
@@ -30,6 +35,11 @@ export default class Tunes {
         name: 'withBorder',
         icon: borderIcon,
         title: 'With border',
+      },
+      {
+        name: 'withLink',
+        icon: linkIcon,
+        title: "Add link",
       },
       {
         name: 'withBackground',
@@ -105,10 +115,26 @@ export default class Tunes {
       }
     }
 
+    //  execute custom tune logic
+    if (typeof this.customEffect[tuneName] === 'function') {
+      this.customEffect[tuneName]();
+    }
+
+    //  normal tune logic
     const button = this.buttons.find(el => el.dataset.tune === tuneName);
 
     button.classList.toggle(this.CSS.buttonActive, !button.classList.contains(this.CSS.buttonActive));
+    this.onChange(tuneName);
+  }
 
+  /**
+   * Same as tune click logic without the if
+   * @param tuneName
+   */
+  normalTuneClicked(tuneName) {
+    const button = this.buttons.find(el => el.dataset.tune === tuneName);
+    if (!button) return;
+    button.classList.toggle(this.CSS.buttonActive, !button.classList.contains(this.CSS.buttonActive));
     this.onChange(tuneName);
   }
 }
