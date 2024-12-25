@@ -76,7 +76,8 @@
 	&--empty,
 	&--loading {
 		^&__caption {
-			display: none;
+			visibility: hidden;
+			height: 0px;
 		}
 	}
 
