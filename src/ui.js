@@ -1,4 +1,5 @@
-import buttonIcon from './svg/button-icon.svg';
+import { IconPicture } from '@codexteam/icons';
+import { make } from './utils/dom';
 
 /**
  * Class for working with UI:
@@ -165,7 +166,7 @@ export default class Ui {
   createFileButton() {
     const button = make('div', [ this.CSS.button ]);
 
-    button.innerHTML = this.config.buttonContent || `${buttonIcon} ${this.api.i18n.t('Select an Image')}`;
+    button.innerHTML = this.config.buttonContent || `${IconPicture} ${this.api.i18n.t('Select an Image')}`;
 
     button.addEventListener('click', () => {
       this.onSelectFile();
@@ -417,29 +418,6 @@ export default class Ui {
   }
 }
 
-/**
- * Helper for making Elements with attributes
- *
- * @param  {string} tagName           - new Element tag name
- * @param  {Array|string} classNames  - list or name of CSS class
- * @param  {object} attributes        - any attributes
- * @returns {Element}
- */
-export const make = function make(tagName, classNames = null, attributes = {}) {
-  const el = document.createElement(tagName);
-
-  if (Array.isArray(classNames)) {
-    el.classList.add(...classNames);
-  } else if (classNames) {
-    el.classList.add(classNames);
-  }
-
-  for (const attrName in attributes) {
-    el[attrName] = attributes[attrName];
-  }
-
-  return el;
-};
-
 // eslint-disable-next-line
 const linkCheck = str => /(https:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(str);
+

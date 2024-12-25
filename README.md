@@ -19,17 +19,15 @@ Image Block for the [Editor.js](https://editorjs.io).
 
 This Tool requires server-side implementation for the file uploading. See [backend response format](#server-format) for more details.
 
-This Tool is also capable of uploading & displaying video files using the <video> element. To enable this, specify video mime-types via the 'types' config param.
+This Tool is also capable of uploading & displaying video files using the `<video>` element. To enable this, specify video mime-types via the 'types' config param.
 
 
 ## Installation
 
-### Install via NPM
-
 Get the package
 
 ```shell
-npm i --save-dev @editorjs/image
+yarn add @editorjs/image
 ```
 
 Include module at your application
@@ -38,20 +36,7 @@ Include module at your application
 import ImageTool from '@editorjs/image';
 ```
 
-### Other methods
-
-#### Manual downloading and connecting
-
-1. Upload folder `dist` from repository
-2. Add `dist/bundle.js` file to your page.
-
-#### Loading from CDN
-
-You can load a specific version of package from [jsDelivr CDN](https://www.jsdelivr.com/package/npm/@editorjs/image).
-
-`https://cdn.jsdelivr.net/npm/@editorjs/image@2.3.0`
-
-Then require this script on page with Editor.js through the `<script src=""></script>` tag.
+Optionally, you can load this tool from [JsDelivr CDN](https://cdn.jsdelivr.net/npm/@editorjs/image@latest)
 
 ## Usage
 
@@ -118,15 +103,15 @@ actions: [
         name: 'new_button',
         icon: '<svg>...</svg>',
         title: 'New Button',
+        toggle: true,
         action: (name) => {
             alert(`${name} button clicked`);
-            return false;
         }
     }
 ]
 ```
-By adding `return true` or `return false` at the end of your custom actions, you can determine wether the icon in the tool's settings is toggled or not. This is helpfull for actions that do not toggle between states, but execute a different action.
-If toggling is enabled, an `image-tool--[button name]` class will be appended and removed from the container.
+
+**_NOTE:_**  return value of `action` callback for settings whether action button should be toggled or not is *deprecated*. Consider using `toggle` option instead.
 
 ## Output data
 
@@ -170,14 +155,16 @@ This Tool works by one of the following schemes:
 Scenario:
 
 1. User select file from the device
-2. Tool sends it to **your** backend (on `config.endpoint.byFile` route)
+2. Tool sends it to **your** backend (on `config.endpoints.byFile` route)
 3. Your backend should save file and return file data with JSON at specified format.
 4. Image tool shows saved image and stores server answer
 
 So, you can implement backend for file saving by your own way. It is a specific and trivial task depending on your
 environment and stack.
 
-Response of your uploader **should** cover following format:
+The tool executes the request as [`multipart/form-data`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST), with the key as the value of `field`  in configuration.
+
+The response of your uploader **should**  cover the following format:
 
 ```json5
 {
@@ -201,9 +188,18 @@ Scenario:
 
 1. User pastes an URL of the image file to the Editor
 2. Editor pass pasted string to the Image Tool
-3. Tool sends it to **your** backend (on `config.endpoint.byUrl` route) via 'url' POST-parameter
-3. Your backend should accept URL, **download and save the original file by passed URL** and return file data with JSON at specified format.
-4. Image tool shows saved image and stores server answer
+3. Tool sends it to **your** backend (on `config.endpoints.byUrl` route) via 'url' in request body
+4. Your backend should accept URL, **download and save the original file by passed URL** and return file data with JSON at specified format.
+5. Image tool shows saved image and stores server answer
+
+The tool executes the request as `application/json` with the following request body:
+
+```json5
+{
+  "url": "<pasted URL from the user>"
+  "additionalRequestData": "<additional request data from configuration>"
+}
+```
 
 Response of your uploader should be at the same format as described at «[Uploading files from device](#from-device)» section
 
