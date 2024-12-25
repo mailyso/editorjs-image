@@ -45,8 +45,7 @@ import './index.css';
 import Ui from './ui';
 import Uploader from './uploader';
 
-import { IconAddBorder, IconStretch, IconAddBackground, IconPicture } from '@codexteam/icons';
-import linkIcon from "./svg/link.svg";
+import { IconAddBorder, IconAddBackground, IconPicture, IconLink } from '@codexteam/icons';
 
 /**
  * @typedef {object} ImageConfig
@@ -112,15 +111,9 @@ export default class ImageTool {
         toggle: true,
       },
       {
-        name: 'stretched',
-        icon: IconStretch,
-        title: 'Stretch image',
-        toggle: true,
-      },
-      {
         name: 'withLink',
-        icon: linkIcon,
-        title: "Add link",
+        icon: IconLink,
+        title: 'Add link',
       },
       {
         name: 'withBackground',
@@ -276,6 +269,11 @@ export default class ImageTool {
 
           return;
         }
+
+        if (tune.name === "withLink") {
+          this.ui.toggleAddLink();
+        }
+
         this.tuneToggled(tune.name);
       },
     }));
@@ -499,18 +497,6 @@ export default class ImageTool {
     } else {
       this._data[tuneName] = value;
       this.ui.applyTune(tuneName, value);
-    }
-
-    if (tuneName === 'stretched') {
-      /**
-       * Wait until the API is ready
-       */
-      Promise.resolve().then(() => {
-        this.block.stretched = value;
-      })
-        .catch(err => {
-          console.error(err);
-        });
     }
   }
 

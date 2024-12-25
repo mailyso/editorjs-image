@@ -343,7 +343,7 @@ export default class Ui {
       }
     };
     const inputArea = make('input', [this.CSS.addLinkArea, this.CSS.input], {
-      placeholder: '링크를 입력하세요',
+      placeholder: '이미지에 연결 할 링크를 입력하세요',
       defaultValue: this.linkState.data,
     });
 
