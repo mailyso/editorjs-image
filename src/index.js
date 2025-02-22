@@ -45,7 +45,7 @@ import './index.css';
 import Ui from './ui';
 import Uploader from './uploader';
 
-import { IconAddBorder, IconAddBackground, IconPicture, IconLink } from '@codexteam/icons';
+import { IconAddBorder, IconAddBackground, IconPicture, IconLink, IconRemoveBackground } from '@codexteam/icons';
 
 /**
  * @typedef {object} ImageConfig
@@ -120,6 +120,12 @@ export default class ImageTool {
         icon: IconAddBackground,
         title: 'With background',
         toggle: true,
+      },
+      {
+        name: 'withoutGap',
+        icon: IconRemoveBackground,
+        title: 'Without Gap',
+        toggle: true
       },
     ];
   }
